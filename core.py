@@ -1,30 +1,23 @@
 # core.py
 # This file contains the core function for booking a library spot through the Affluences platform. See below
-# TODO: Implement email authentication
 
-import email
-import imaplib
-import json
 import os
-import random
 import re
+import json
 import time
-
+import email
+import random
+import imaplib
 import requests
-from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from email.header import decode_header
 
-# --- Configuration ---
-# Load environment variables from .env file
-load_dotenv()  # pyright: ignore[reportUnusedCallResult]
 
 # Get credentials securely from environment variables
+_ = load_dotenv()
 IMAP_SERVER = os.environ.get("IMAP_SERVER")
 EMAIL_ADDRESS = os.environ.get("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
-
-# --- Helper Functions ---
 
 
 def get_random_user_agent():
@@ -118,6 +111,7 @@ def find_confirmation_link(
     Returns:
         The confirmation URL if found, otherwise None.
     """
+    imap = None  # Initialize imap to None before the try block
     print("Connecting to email server to find confirmation link...")
     try:
         imap = imaplib.IMAP4_SSL(imap_server)
@@ -125,7 +119,7 @@ def find_confirmation_link(
         _ = imap.select("INBOX")
 
         # Search for unread emails from 'no-reply@affluences.com' with the subject "Confirm your reservation"
-        status, messages = imap.search(
+        status, messages_data = imap.search(
             None,
             '(UNSEEN FROM "no-reply@affluences.com" SUBJECT "Confirm your reservation")',
         )
@@ -133,20 +127,22 @@ def find_confirmation_link(
             print("Failed to search for emails.")
             return None
 
-        message_ids = messages[0].split()
+        # messages_data[0] is a bytes object containing space-separated message IDs
+        message_ids = messages_data[0].split()
         if not message_ids:
             print("No new Affluences confirmation emails found.")
             return None
 
         # Fetch the most recent email
         latest_id = message_ids[-1]
-        res, msg_data = imap.fetch(latest_id, "(RFC822)")
+        # Change 'res' to '_' as it's not used
+        _status, msg_data = imap.fetch(latest_id, "(RFC822)")
 
         # The email is multipart (text and html), we need to find the right part
         for response_part in msg_data:
             if isinstance(response_part, tuple):
                 msg = email.message_from_bytes(response_part[1])
-                body = ""
+                body: str = "" # Initialize body as str
 
                 # Prefer the plain text version as it's more reliable
                 if msg.is_multipart():
@@ -154,21 +150,25 @@ def find_confirmation_link(
                         content_type = part.get_content_type()
                         if content_type == "text/plain":
                             # Decode the payload from quoted-printable or base64
-                            try:
-                                body = part.get_payload(decode=True).decode(
-                                    part.get_content_charset() or "utf-8"
-                                )
-                                break  # Found plain text, stop looking
-                            except:
-                                continue
+                            payload = part.get_payload(decode=True)
+                            if isinstance(payload, bytes):
+                                try:
+                                    body = payload.decode(
+                                        part.get_content_charset() or "utf-8", errors="replace"
+                                    )
+                                    break  # Found plain text, stop looking
+                                except UnicodeDecodeError:
+                                    continue
                 else:
                     # Not multipart, just get the payload
-                    try:
-                        body = msg.get_payload(decode=True).decode(
-                            msg.get_content_charset() or "utf-8"
-                        )
-                    except:
-                        pass
+                    payload = msg.get_payload(decode=True)
+                    if isinstance(payload, bytes):
+                        try:
+                            body = payload.decode(
+                                msg.get_content_charset() or "utf-8", errors="replace"
+                            )
+                        except UnicodeDecodeError:
+                            pass
 
                 if not body:
                     print("Could not extract a readable body from the email.")
@@ -193,9 +193,10 @@ def find_confirmation_link(
         print(f"An error occurred while fetching email: {e}")
         return None
     finally:
-        if "imap" in locals() and imap.state == "SELECTED":
-            imap.close()
-            imap.logout()
+        # This check is now cleaner. It will only run if 'imap' was successfully assigned.
+        if imap and imap.state == "SELECTED":
+            _ = imap.close()
+            _ = imap.logout()
 
 
 def confirm_reservation(confirmation_url: str) -> bool:
@@ -247,17 +248,20 @@ def confirm_reservation(confirmation_url: str) -> bool:
 # --- Main Orchestration Function ---
 
 
-def book_library_spot(library_id: str, date: str, start_time: str):
+def book_library_spot(
+    library_id: str, date: str, start_time: str, duration_hours: float
+):
     """
-    Main function to orchestrate the entire booking process for a 2-hour slot.
+    Main function to orchestrate the entire booking process for a library spot.
 
     1. Sends the initial reservation request.
     2. Waits and searches for the confirmation email.
     3. Follows the confirmation link to finalize the booking.
     """
-    # The bot always books a 2-hour slot as per the requirements.
-    hour, minute = map(int, start_time.split(":"))
-    end_time = f"{hour + 2:02d}:{minute:02d}"
+    # Calculate end time based on a float duration in hours
+    start_dt = datetime.strptime(start_time, "%H:%M")
+    end_dt = start_dt + timedelta(hours=duration_hours)
+    end_time = end_dt.strftime("%H:%M")
 
     if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
         print(
@@ -292,14 +296,11 @@ def book_library_spot(library_id: str, date: str, start_time: str):
         return
 
     # Step 3: Confirm the reservation
-    confirm_reservation(confirmation_link)
+    _ = confirm_reservation(confirmation_link)
 
 
 # --- Example Usage ---
 if __name__ == "__main__":
-    # This is an example of how to use the book_library_spot function.
-    # You will need to replace the placeholder values with real ones.
-
     # IMPORTANT: To find the library_id:
     # 1. Go to your library's booking page on affluences.com.
     # 2. Open your browser's Developer Tools (F12 or Ctrl+Shift+I).
@@ -307,14 +308,15 @@ if __name__ == "__main__":
     # 4. Complete a reservation manually.
     # 5. Look for a request to a URL like '.../api/reserve/12345'. The number is your library_id.
 
-    EXAMPLE_LIBRARY_ID = (
-        "69370"  # This is an example for Rimini, replace it with yours.
-    )
-    EXAMPLE_DATE = "2026-04-07"  # Replace with the desired date
-    EXAMPLE_START_TIME = "15:00"  # Replace with the desired start time
+    EXAMPLE_LIBRARY_ID = "5350"
+    EXAMPLE_DATE = "2026-04-03"
+    EXAMPLE_START_TIME = "15:00"
 
     print("--- Starting Library Booking Bot ---")
     book_library_spot(
-        library_id=EXAMPLE_LIBRARY_ID, date=EXAMPLE_DATE, start_time=EXAMPLE_START_TIME
+        library_id=EXAMPLE_LIBRARY_ID,
+        date=EXAMPLE_DATE,
+        start_time=EXAMPLE_START_TIME,
+        duration_hours=2,
     )
     print("--- Library Booking Bot Finished ---")
