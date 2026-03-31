@@ -1,5 +1,6 @@
 # core.py
 # This file contains the core functions for booking a library spot through the Affluences platform.
+# TODO: Implement email authentication
 
 import email
 import imaplib
@@ -8,11 +9,11 @@ import os
 import random
 import re
 import time
-from email.header import decode_header
 
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from email.header import decode_header
 
 # --- Configuration ---
 # Load environment variables from .env file
@@ -99,118 +100,157 @@ def create_reservation(
         return False
 
 
-# def find_confirmation_link(email_address: str, password: str, imap_server: str) -> str | None:
-#     """
-#     Logs into an email account, finds the latest Affluences confirmation email,
-#     and extracts the confirmation link.
+def find_confirmation_link(
+    email_address: str, password: str, imap_server: str
+) -> str | None:
+    """
+    Logs into an email account, finds the latest Affluences confirmation email,
+    and extracts the confirmation link.
 
-#     **SECURITY WARNING**: This function handles email credentials directly.
-#     It is safer to use environment variables or other secrets management tools.
+    **SECURITY WARNING**: This function handles email credentials directly.
+    It is safer to use environment variables or other secrets management tools.
 
-#     Args:
-#         email_address: The user's email address.
-#         password: The user's email password or an app-specific password.
-#         imap_server: The IMAP server address for the email provider.
+    Args:
+        email_address: The user's email address.
+        password: The user's email password or an app-specific password.
+        imap_server: The IMAP server address for the email provider.
 
-#     Returns:
-#         The confirmation URL if found, otherwise None.
-#     """
-#     print("Connecting to email server to find confirmation link...")
-#     try:
-#         imap = imaplib.IMAP4_SSL(imap_server)
-#         imap.login(email_address, password)
-#         imap.select("INBOX")
+    Returns:
+        The confirmation URL if found, otherwise None.
+    """
+    print("Connecting to email server to find confirmation link...")
+    try:
+        imap = imaplib.IMAP4_SSL(imap_server)
+        _ = imap.login(email_address, password)
+        _ = imap.select("INBOX")
 
-#         # Search for unread emails from 'no-reply@affluences.com' with the subject "Confirm your reservation"
-#         status, messages = imap.search(None, '(UNSEEN FROM "no-reply@affluences.com" SUBJECT "Confirm your reservation")')
-#         if status != "OK":
-#             print("Failed to search for emails.")
-#             return None
+        # Search for unread emails from 'no-reply@affluences.com' with the subject "Confirm your reservation"
+        status, messages = imap.search(
+            None,
+            '(UNSEEN FROM "no-reply@affluences.com" SUBJECT "Confirm your reservation")',
+        )
+        if status != "OK":
+            print("Failed to search for emails.")
+            return None
 
-#         message_ids = messages[0].split()
-#         if not message_ids:
-#             print("No new Affluences confirmation emails found.")
-#             return None
+        message_ids = messages[0].split()
+        if not message_ids:
+            print("No new Affluences confirmation emails found.")
+            return None
 
-#         # Fetch the most recent email
-#         latest_id = message_ids[-1]
-#         res, msg_data = imap.fetch(latest_id, "(RFC822)")
+        # Fetch the most recent email
+        latest_id = message_ids[-1]
+        res, msg_data = imap.fetch(latest_id, "(RFC822)")
 
-#         for response_part in msg_data:
-#             if isinstance(response_part, tuple):
-#                 msg = email.message_from_bytes(response_part[1])
+        for response_part in msg_data:
+                if isinstance(response_part, tuple):
+                    # Parse the raw bytes into an email object
+                    msg = email.message_from_bytes(response_part[1])
 
-#                 # Find the HTML part of the email
-#                 if msg.is_multipart():
-#                     for part in msg.walk():
-#                         if part.get_content_type() == "text/html":
-#                             body = part.get_payload(decode=True).decode()
-#                             break
-#                 else:
-#                     body = msg.get_payload(decode=True).decode()
+                    # Helper to quickly decode weird header text
+                    def get_clean_header(header_name):
+                        raw_val = msg.get(header_name)
+                        if not raw_val: return "N/A"
+                        decoded_parts = decode_header(raw_val)
+                        clean_string = ""
+                        for part, encoding in decoded_parts:
+                            if isinstance(part, bytes):
+                                clean_string += part.decode(encoding or "utf-8", errors="replace")
+                            else:
+                                clean_string += part
+                        return clean_string
 
-#                 # Parse the HTML and find the confirmation link
-#                 soup = BeautifulSoup(body, 'html.parser')
-#                 # The confirmation link is usually the first link in the email body
-#                 for link in soup.findAll('a'):
-#                     href = link.get('href')
-#                     if href and "affluences.com/reservation/confirm?reservationToken=" in href:
-#                         print("Found confirmation link.")
-#                         return href
+                    # --- 4. THE SANITY CHECK OUTPUT ---
+                    print("=== VERIFICATION DATA ===")
+                    print(f"Date Fetched: {msg.get('Date')}")
+                    print(f"Sender:       {get_clean_header('From')}")
+                    print(f"Subject:      {get_clean_header('Subject')}")
+                    print("=========================")
 
-#         print("Could not find a confirmation link in the latest email.")
-#         return None
 
-#     except Exception as e:
-#         print(f"An error occurred while fetching email: {e}")
-#         return None
-#     finally:
-#         if 'imap' in locals() and imap.state == 'SELECTED':
-#             imap.close()
-#             imap.logout()
+        # for response_part in msg_data:
+        #     if isinstance(response_part, tuple):
+        #         msg = email.message_from_bytes(response_part[1])
 
-# def confirm_reservation(confirmation_url: str) -> bool:
-#     """
-#     Visits the confirmation URL and sends the final API request to confirm the booking.
+        #         # Find the HTML part of the email
+        #         if msg.is_multipart():
+        #             for part in msg.walk():
+        #                 if part.get_content_type() == "text/html":
+        #                     body = part.get_payload(decode=True).decode()
+        #                     break
+        #         else:
+        #             body = msg.get_payload(decode=True).decode()
 
-#     Args:
-#         confirmation_url: The full confirmation URL from the email.
+        #         # Parse the HTML and find the confirmation link
+        #         soup = BeautifulSoup(body, "html.parser")
+        #         # The confirmation link is usually the first link in the email body
+        #         for link in soup.findAll("a"):
+        #             href = link.get("href")
+        #             if (
+        #                 href
+        #                 and "affluences.com/reservation/confirm?reservationToken="
+        #                 in href
+        #             ):
+        #                 print("Found confirmation link.")
+        #                 return href
 
-#     Returns:
-#         True if the confirmation was successful, False otherwise.
-#     """
-#     print("Attempting to confirm reservation...")
-#     try:
-#         # Extract the reservation token from the URL
-#         token_match = re.search(r'reservationToken=([a-f0-9\-]+)', confirmation_url)
-#         if not token_match:
-#             print("Invalid confirmation URL: token not found.")
-#             return False
+        print("Could not find a confirmation link in the latest email.")
+        return None
 
-#         token = token_match.group(1)
+    except Exception as e:
+        print(f"An error occurred while fetching email: {e}")
+        return None
+    finally:
+        if "imap" in locals() and imap.state == "SELECTED":
+            imap.close()
+            imap.logout()
 
-#         # The API endpoint for confirmation is different from the link in the email
-#         api_confirm_url = f"https://reservation.affluences.com/api/reservations/{token}/confirmation"
 
-#         headers = {
-#             "Accept": "application/json, text/plain, */*",
-#             "Content-Type": "application/json",
-#             "Origin": "https://affluences.com",
-#             "Referer": "https://affluences.com/",
-#             "User-Agent": get_random_user_agent()
-#         }
+def confirm_reservation(confirmation_url: str) -> bool:
+    """
+    Visits the confirmation URL and sends the final API request to confirm the booking.
 
-#         # The confirmation API requires a POST request with an empty JSON body
-#         response = requests.post(api_confirm_url, json={}, headers=headers, timeout=10)
-#         response.raise_for_status()
+    Args:
+        confirmation_url: The full confirmation URL from the email.
 
-#         print("Reservation confirmed successfully!")
-#         return True
+    Returns:
+        True if the confirmation was successful, False otherwise.
+    """
+    print("Attempting to confirm reservation...")
+    try:
+        # Extract the reservation token from the URL
+        token_match = re.search(r"reservationToken=([a-f0-9\-]+)", confirmation_url)
+        if not token_match:
+            print("Invalid confirmation URL: token not found.")
+            return False
 
-#     except requests.exceptions.RequestException as e:
-#         print(f"Error confirming reservation: {e}")
-#         print(f"Response content: {e.response.text if e.response else 'No response'}")
-#         return False
+        token = token_match.group(1)
+
+        # The API endpoint for confirmation is different from the link in the email
+        api_confirm_url = (
+            f"https://reservation.affluences.com/api/reservations/{token}/confirmation"
+        )
+
+        headers = {
+            "Accept": "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+            "Origin": "https://affluences.com",
+            "Referer": "https://affluences.com/",
+            "User-Agent": get_random_user_agent(),
+        }
+
+        # The confirmation API requires a POST request with an empty JSON body
+        response = requests.post(api_confirm_url, json={}, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        print("Reservation confirmed successfully!")
+        return True
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error confirming reservation: {e}")
+        print(f"Response content: {e.response.text if e.response else 'No response'}")
+        return False
+
 
 # --- Main Orchestration Function ---
 
@@ -240,20 +280,27 @@ def book_library_spot(library_id: str, date: str, start_time: str):
     # Step 2: Find the confirmation link in the email
     # It can take a minute for the email to arrive. We'll wait and retry.
     print("Waiting for confirmation email to arrive...")
-    # confirmation_link = None
-    # for i in range(5): # Retry 5 times over 50 seconds
-    #     time.sleep(10)
-    #     print(f"Checking for email (Attempt {i+1}/5)...")
-    #     confirmation_link = find_confirmation_link(EMAIL_ADDRESS, EMAIL_PASSWORD, IMAP_SERVER)
-    #     if confirmation_link:
-    #         break
+    confirmation_link = None
+    for i in range(5):  # Retry 5 times over 50 seconds
+        time.sleep(10)
+        print(f"Checking for email (Attempt {i + 1}/5)...")
+        if not IMAP_SERVER or not EMAIL_ADDRESS or not EMAIL_PASSWORD:
+            print("Email credentials not configured in .env file.")
+            return
+        confirmation_link = find_confirmation_link(
+            EMAIL_ADDRESS, EMAIL_PASSWORD, IMAP_SERVER
+        )
+        if confirmation_link:
+            break
 
-    # if not confirmation_link:
-    #     print("Could not find confirmation email after several attempts. Please check your inbox manually.")
-    #     return
+    if not confirmation_link:
+        print(
+            "Could not find confirmation email after several attempts. Please check your inbox manually."
+        )
+        return
 
-    # # Step 3: Confirm the reservation
-    # confirm_reservation(confirmation_link)
+    # Step 3: Confirm the reservation
+    confirm_reservation(confirmation_link)
 
 
 # --- Example Usage ---
@@ -271,8 +318,8 @@ if __name__ == "__main__":
     EXAMPLE_LIBRARY_ID = (
         "69370"  # This is an example for Rimini, replace it with yours.
     )
-    EXAMPLE_DATE = "2026-03-24"  # Replace with the desired date
-    EXAMPLE_START_TIME = "09:00"  # Replace with the desired start time
+    EXAMPLE_DATE = "2026-04-07"  # Replace with the desired date
+    EXAMPLE_START_TIME = "11:00"  # Replace with the desired start time
 
     print("--- Starting Library Booking Bot ---")
     book_library_spot(

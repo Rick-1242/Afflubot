@@ -91,7 +91,7 @@ for link in soup.findAll('a'):
         url=str(link)[len("<a href=\""):len("<a href=\"https://affluences.com/reservation/confirm?reservationToken=941f3dfb-c945-57da-9eed-cfcad868c02e")]
         break
 t=url[len("https://affluences.com/reservation/confirm?reservationToken="):]
-l="https://reservation.affluences.com/api/reservations/"+t+"/confirmation"	
+l="https://reservation.affluences.com/api/reservations/"+t+"/confirmation"
 headers = {
 "authority": "reservation.affluences.com",
 "method": "POST",
@@ -127,12 +127,3 @@ t=url[len("https://affluences.com/reservation/confirm?reservationToken="):]
 l="https://reservation.affluences.com/api/reservations/"+t+"/confirmation"
 r1= requests.options(l, timeout=1)
 r1 = requests.post(l,json={}, headers=headers,timeout=5)
-
-
-
-
-
-
-
-
-

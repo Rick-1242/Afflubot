@@ -7,6 +7,10 @@ BIBLIOTECHE SUPPORTATE:
  - [Biblioteca Santa Marta](https://affluences.com/it/sites/biblioteca-santa-marta) - Università di Verona in Via Cantarane 24
  - [Biblioteca Meneghetti](https://affluences.com/it/sites/biblioteca-meneghetti-1) - Università di Verona in Strada le Grazie 8
 
+## Requirements
+
+*   Python 3.10 or newer
+
 USAGE: To define
 
 <!--Su ubuntu è possibile lanciare in automatico il file a mezzanotte tramite crontab.
