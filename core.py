@@ -1,5 +1,5 @@
 # core.py
-# This file contains the core functions for booking a library spot through the Affluences platform.
+# This file contains the core function for booking a library spot through the Affluences platform. See below
 # TODO: Implement email authentication
 
 import email
@@ -105,7 +105,7 @@ def find_confirmation_link(
 ) -> str | None:
     """
     Logs into an email account, finds the latest Affluences confirmation email,
-    and extracts the confirmation link.
+    and extracts the confirmation link from the plain text part of the email.
 
     **SECURITY WARNING**: This function handles email credentials directly.
     It is safer to use environment variables or other secrets management tools.
@@ -142,57 +142,49 @@ def find_confirmation_link(
         latest_id = message_ids[-1]
         res, msg_data = imap.fetch(latest_id, "(RFC822)")
 
+        # The email is multipart (text and html), we need to find the right part
         for response_part in msg_data:
-                if isinstance(response_part, tuple):
-                    # Parse the raw bytes into an email object
-                    msg = email.message_from_bytes(response_part[1])
+            if isinstance(response_part, tuple):
+                msg = email.message_from_bytes(response_part[1])
+                body = ""
 
-                    # Helper to quickly decode weird header text
-                    def get_clean_header(header_name):
-                        raw_val = msg.get(header_name)
-                        if not raw_val: return "N/A"
-                        decoded_parts = decode_header(raw_val)
-                        clean_string = ""
-                        for part, encoding in decoded_parts:
-                            if isinstance(part, bytes):
-                                clean_string += part.decode(encoding or "utf-8", errors="replace")
-                            else:
-                                clean_string += part
-                        return clean_string
+                # Prefer the plain text version as it's more reliable
+                if msg.is_multipart():
+                    for part in msg.walk():
+                        content_type = part.get_content_type()
+                        if content_type == "text/plain":
+                            # Decode the payload from quoted-printable or base64
+                            try:
+                                body = part.get_payload(decode=True).decode(
+                                    part.get_content_charset() or "utf-8"
+                                )
+                                break  # Found plain text, stop looking
+                            except:
+                                continue
+                else:
+                    # Not multipart, just get the payload
+                    try:
+                        body = msg.get_payload(decode=True).decode(
+                            msg.get_content_charset() or "utf-8"
+                        )
+                    except:
+                        pass
 
-                    # --- 4. THE SANITY CHECK OUTPUT ---
-                    print("=== VERIFICATION DATA ===")
-                    print(f"Date Fetched: {msg.get('Date')}")
-                    print(f"Sender:       {get_clean_header('From')}")
-                    print(f"Subject:      {get_clean_header('Subject')}")
-                    print("=========================")
+                if not body:
+                    print("Could not extract a readable body from the email.")
+                    continue
 
+                # Use regex to find the confirmation link in the decoded body
+                # This is more robust than parsing HTML with tracking links
+                match = re.search(
+                    r"(https://affluences\.com/reservation/confirm\?reservationToken=[a-f0-9\-]+)",
+                    body,
+                )
 
-        # for response_part in msg_data:
-        #     if isinstance(response_part, tuple):
-        #         msg = email.message_from_bytes(response_part[1])
-
-        #         # Find the HTML part of the email
-        #         if msg.is_multipart():
-        #             for part in msg.walk():
-        #                 if part.get_content_type() == "text/html":
-        #                     body = part.get_payload(decode=True).decode()
-        #                     break
-        #         else:
-        #             body = msg.get_payload(decode=True).decode()
-
-        #         # Parse the HTML and find the confirmation link
-        #         soup = BeautifulSoup(body, "html.parser")
-        #         # The confirmation link is usually the first link in the email body
-        #         for link in soup.findAll("a"):
-        #             href = link.get("href")
-        #             if (
-        #                 href
-        #                 and "affluences.com/reservation/confirm?reservationToken="
-        #                 in href
-        #             ):
-        #                 print("Found confirmation link.")
-        #                 return href
+                if match:
+                    confirmation_link = match.group(0)
+                    print("Found confirmation link.")
+                    return confirmation_link
 
         print("Could not find a confirmation link in the latest email.")
         return None
@@ -319,7 +311,7 @@ if __name__ == "__main__":
         "69370"  # This is an example for Rimini, replace it with yours.
     )
     EXAMPLE_DATE = "2026-04-07"  # Replace with the desired date
-    EXAMPLE_START_TIME = "11:00"  # Replace with the desired start time
+    EXAMPLE_START_TIME = "15:00"  # Replace with the desired start time
 
     print("--- Starting Library Booking Bot ---")
     book_library_spot(
