@@ -30,7 +30,7 @@ python main.py library_name spot_number start_date day_start_time day_end_time
 To book spot #141 at Biblioteca Meneghetti from 09:00 to 18:00, starting on April 8th, 2026, you would run:
 
 ```bash
-python main.py Meneghetti 141 2026-04-08 09:00 18:00
+python -m app.main Meneghetti 141 2026-04-08 09:00 18:00
 ```
 
 The bot will then attempt to book 3-hour slots for that spot for the next 7 days, starting from the specified date. Su ubuntu è possibile lanciare in automatico il file a mezzanotte tramite crontab.
