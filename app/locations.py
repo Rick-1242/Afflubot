@@ -4,7 +4,6 @@ from typing import TypedDict
 
 # --- Type Definitions ---
 class LibraryInfo(TypedDict):
-    """A TypedDict to enforce the structure of library data."""
     spots: dict[int, int | None]
     hours: dict[int, tuple[str, str]]
     max_ahead_booking_days: int
@@ -70,6 +69,8 @@ SANTA_MARTA_SPOTS: dict[int,  int | None] = {
     101: 23732, 102: 23733, 103: 23734, 104: 23735, 105: 23736, 106: 23737, 107: 23738, 108: 23739, 109: 23740, 110: 23741,
     111: 23742, 112: 23743, 113: 23744, 114: 23745, 115: 23746, 116: 23747, 117: 23748, 118: 23749, 119: 23750, 120: 23751,
     121: 23752, 122: 23753, 123: 23754,
+    # Scienze economiche
+    #
 }
 
 SANTA_MARTA_HOURS: dict[int, tuple[str, str]] = {
