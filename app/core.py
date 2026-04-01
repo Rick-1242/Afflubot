@@ -272,7 +272,7 @@ def book_library_spot(
     print("Waiting for confirmation email to arrive...")
     confirmation_link = None
     for i in range(5):  # Retry 5 times over 50 seconds
-        time.sleep(10)
+        time.sleep(5)
         print(f"Checking for email (Attempt {i + 1}/5)...")
         if not IMAP_SERVER or not EMAIL_ADDRESS or not EMAIL_PASSWORD:
             print("Email credentials not configured in .env file.")

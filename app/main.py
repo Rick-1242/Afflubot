@@ -12,7 +12,6 @@ from .locations import LIBRARY_DATA
 
 
 
-
 def main():
     """
     The main function to parse arguments and run the booking loops.
@@ -102,13 +101,6 @@ def main():
             print(f"Skipping: Library is closed on this day.")
             current_date += timedelta(days=1)
             continue
-
-        # Validate the data structure from locations.py before unpacking
-        if not isinstance(library_hours_today, tuple) or len(library_hours_today) != 2:
-            print(f"!!! DATA ERROR in locations.py !!!")
-            print(f"On {current_date_str} (day {day_of_week}), the hours data is invalid.")
-            print(f"Expected a format like ('HH:MM', 'HH:MM'), but got: {library_hours_today}")
-            sys.exit(1)
 
         open_time_str, close_time_str = library_hours_today
         open_time_dt = datetime.strptime(open_time_str, "%H:%M")
