@@ -7,14 +7,10 @@ import sys
 import time
 from datetime import datetime, timedelta
 
-import core
-from locations import LIBRARY_DATA
+from . import core
+from .locations import LIBRARY_DATA
 
-# --- Constants ---
-# How many days ahead to book from today.
-MAX_AHEAD_BOOKING_DAYS = 7
-# The size of the primary booking chunks in hours.
-BOOKING_CHUNK_HOURS = 3
+
 
 
 def main():
@@ -57,9 +53,7 @@ def main():
     # --- 1. Find the Library Data and Spot ID ---
     library_data = LIBRARY_DATA.get(args.library_name)
     if not library_data:
-        print(
-            f"Error: Library '{args.library_name}' not found in locations.py. Please add it to LIBRARY_DATA."
-        )
+        print(f"Error: Library '{args.library_name}' not found in locations.py. Please add it to LIBRARY_DATA.")
         sys.exit(1)
 
     spot_id = library_data["spots"].get(args.spot_number)
@@ -68,6 +62,10 @@ def main():
             f"Error: Spot number {args.spot_number} not found for library '{args.library_name}' in locations.py."
         )
         sys.exit(1)
+
+    # Extract library-specific constants
+    max_ahead_booking_days = library_data["max_ahead_booking_days"]
+    booking_chunk_hours = library_data["booking_chunk_hours"]
 
     print(
         f"Found Spot ID: {spot_id} for Library: {args.library_name}, Spot: {args.spot_number}"
@@ -84,7 +82,7 @@ def main():
 
     # --- 3. Run the Booking Loops ---
     today = datetime.now().date()
-    max_allowed_date = today + timedelta(days=MAX_AHEAD_BOOKING_DAYS)
+    max_allowed_date = today + timedelta(days=max_ahead_booking_days)
 
     current_date = booking_start_date
     while current_date <= max_allowed_date:
@@ -133,7 +131,7 @@ def main():
             if remaining_hours <= 0:
                 break
 
-            duration = min(remaining_hours, BOOKING_CHUNK_HOURS)
+            duration = min(remaining_hours, booking_chunk_hours)
             start_time_str = current_time_dt.strftime("%H:%M")
             end_time_dt = current_time_dt + timedelta(hours=duration)
             end_time_str = end_time_dt.strftime("%H:%M")

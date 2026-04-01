@@ -1,6 +1,17 @@
 # This file contains the data mappings for library spots, including spot IDs and opening hours.
+from typing import TypedDict
 
-MENEGHETTI_SPOTS = {
+
+# --- Type Definitions ---
+class LibraryInfo(TypedDict):
+    """A TypedDict to enforce the structure of library data."""
+    spots: dict[int, int | None]
+    hours: dict[int, tuple[str, str]]
+    max_ahead_booking_days: int
+    booking_chunk_hours: int
+
+
+MENEGHETTI_SPOTS: dict[int, int | None] = {
     1: 5350,
     2: 5885, 3: 5886, 4: 5887, 5: 5888, 6: 5889, 7: 5890, 8: 5891, 9: 5892, 10: 5893,
     11: 5894, 12: 5895, 13: 5896, 14: 5897, 15: 5898, 16: 5899, 17: 5900, 18: 5901, 19: 5902, 20: 5903,
@@ -31,7 +42,7 @@ MENEGHETTI_SPOTS = {
     251: 69479, 252: 69480
 }
 
-MENEGHETTI_HOURS = {
+MENEGHETTI_HOURS: dict[int, tuple[str, str]] = {
     0: ("08:30", "23:30"),  # Monday
     1: ("08:30", "23:30"),  # Tuesday
     2: ("08:30", "23:30"),  # Wednesday
@@ -41,14 +52,14 @@ MENEGHETTI_HOURS = {
     6: ("08:30", "23:30"),  # Sunday
 }
 
-SANTA_MARTA_SPOTS = {
+SANTA_MARTA_SPOTS: dict[int,  int | None] = {
     # Scienze giuridiche.
     1: 5348,
     2: 5974, 3: 5975, 4: 5976, 5: 5977, 6: 5978, 7: 5979, 8: 5980, 9: 5981, 10: 5982, 11: 5983, 12: 5984, 13: 5985,
     14: 5986, 15: 5987, 16: 5988, 17: 5989, 18: 5990, 19: 5991, 20: 5992, 21: 5993, 22: 5994,
     23: None,  # This spot is disabled
-    24: 5966, 25: 5997, 26: 5998, 27: 5999, 28: 6000, 29: 6001, 30: 6002, 31: 6003, 32: 6004, 33: 6005,34:6006,
-    35:6007,36: 6008,
+    24: 5966, 25: 5997, 26: 5998, 27: 5999, 28: 6000, 29: 6001, 30: 6002, 31: 6003, 32: 6004, 33: 6005, 34: 6006,
+    35: 6007, 36: 6008,
     37: 6010, 38: 6011, 39: 6012, 40: 6013, 41: 6014, 42: 6015, 43: 6016, 44: 6017, 45: 6018, 46: 6019, 47: 6020,
     48: 6021, 49: 6022, 50: 6023, 51: 6024, 52: 6025, 53: 6026, 54: 6027, 55: 6028, 56: 6029, 57: 6030, 58: 6031,
     59: 6032, 60: 6033, 61: 6034, 62: 6035, 63: 6036, 64: 6037, 65: 6038, 66: 6039, 67: 6040, 68: 6041, 69: 6042,
@@ -61,7 +72,7 @@ SANTA_MARTA_SPOTS = {
     121: 23752, 122: 23753, 123: 23754,
 }
 
-SANTA_MARTA_HOURS = {
+SANTA_MARTA_HOURS: dict[int, tuple[str, str]] = {
     0: ("08:00", "19:30"),  # Monday
     1: ("08:00", "19:30"),  # Tuesday
     2: ("08:00", "19:30"),  # Wednesday
@@ -74,14 +85,18 @@ SANTA_MARTA_HOURS = {
 
 # --- Master Data Map ---
 # This is the main data structure the script uses.
-LIBRARY_DATA = {
+LIBRARY_DATA: dict[str, LibraryInfo] = {
     "Meneghetti": {
         "spots": MENEGHETTI_SPOTS,
         "hours": MENEGHETTI_HOURS,
+        "max_ahead_booking_days": 7,
+        "booking_chunk_hours": 3,
     },
     "Santa_Marta": {
         "spots": SANTA_MARTA_SPOTS,
         "hours": SANTA_MARTA_HOURS,
+        "max_ahead_booking_days": 7,
+        "booking_chunk_hours": 3,
     },
     # e.g., "Frinzi": { "spots": FRINZI_SPOTS, "hours": FRINZI_HOURS }
 }

@@ -33,12 +33,11 @@ To book spot #141 at Biblioteca Meneghetti from 09:00 to 18:00, starting on Apri
 python main.py Meneghetti 141 2026-04-08 09:00 18:00
 ```
 
-The bot will then attempt to book 3-hour slots for that spot for the next 7 days, starting from the specified date.
+The bot will then attempt to book 3-hour slots for that spot for the next 7 days, starting from the specified date. Su ubuntu è possibile lanciare in automatico il file a mezzanotte tramite crontab.
 
-Su ubuntu è possibile lanciare in automatico il file a mezzanotte tramite crontab.
-Per farlo usare il comando crontab -e da terminale e inserire  
-1 0 * * 1,2,3,4,5 /percorsoPython/python3 /percorsoFile/prenotaX.py
-
+---
+## Supported Library Maps
+- [Mappa Biblioteca Meneghetti](assets/mappa_meneghetti.pdf)
 ---
 
 ## Core Architecture
