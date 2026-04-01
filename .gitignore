@@ -11,5 +11,8 @@ pyrightconfig.json
 # Ignore sensitive environment variables
 .env
 
+# Ignore gemini markdown
+GEMINI.md
+
 # Ignore log files
 *.log

@@ -9,7 +9,6 @@ import email
 import random
 import imaplib
 import requests
-from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 
@@ -72,7 +71,7 @@ def create_reservation(
         log_content += f"URL: {url}\n\n"
         log_content += f"Headers:\n{json.dumps(headers, indent=2)}\n\n"
         log_content += f"Payload:\n{json.dumps(payload, indent=2)}\n"
-        with open("requests.log", "a") as f:
+        with open("./logs/requests.log", "a") as f:
             _ = f.write(log_content)
         print("Request details have been written to request.log")
     except Exception as e:
@@ -249,7 +248,7 @@ def confirm_reservation(confirmation_url: str) -> bool:
 
 
 def book_library_spot(
-    library_id: str, date: str, start_time: str, duration_hours: float
+    library_id: str, date: str, start_time: str, end_time: str
 ):
     """
     Main function to orchestrate the entire booking process for a library spot.
@@ -258,11 +257,6 @@ def book_library_spot(
     2. Waits and searches for the confirmation email.
     3. Follows the confirmation link to finalize the booking.
     """
-    # Calculate end time based on a float duration in hours
-    start_dt = datetime.strptime(start_time, "%H:%M")
-    end_dt = start_dt + timedelta(hours=duration_hours)
-    end_time = end_dt.strftime("%H:%M")
-
     if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
         print(
             "ERROR: Credentials not found. Make sure you have a .env file with EMAIL_ADDRESS and EMAIL_PASSWORD."
@@ -301,6 +295,7 @@ def book_library_spot(
 
 # --- Example Usage ---
 if __name__ == "__main__":
+    print("You are running the the core library booking script, please run the main script to start booking.")
     # IMPORTANT: To find the library_id:
     # 1. Go to your library's booking page on affluences.com.
     # 2. Open your browser's Developer Tools (F12 or Ctrl+Shift+I).
@@ -308,15 +303,16 @@ if __name__ == "__main__":
     # 4. Complete a reservation manually.
     # 5. Look for a request to a URL like '.../api/reserve/12345'. The number is your library_id.
 
-    EXAMPLE_LIBRARY_ID = "5350"
-    EXAMPLE_DATE = "2026-04-03"
-    EXAMPLE_START_TIME = "15:00"
-
-    print("--- Starting Library Booking Bot ---")
-    book_library_spot(
-        library_id=EXAMPLE_LIBRARY_ID,
-        date=EXAMPLE_DATE,
-        start_time=EXAMPLE_START_TIME,
-        duration_hours=2,
-    )
-    print("--- Library Booking Bot Finished ---")
+    # EXAMPLE_LIBRARY_ID = "5350"
+    # EXAMPLE_DATE = "2026-04-03"
+    # EXAMPLE_START_TIME = "15:00"
+    # EXAMPLE_END_TIME = "17:00"
+    #
+    # print("--- Starting Library Booking Bot ---")
+    # book_library_spot(
+    #     library_id=EXAMPLE_LIBRARY_ID,
+    #     date=EXAMPLE_DATE,
+    #     start_time=EXAMPLE_START_TIME,
+    #     end_time=EXAMPLE_END_TIME,
+    # )
+    # print("--- Library Booking Bot Finished ---")
