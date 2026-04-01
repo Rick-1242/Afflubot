@@ -38,6 +38,7 @@ The bot will then attempt to book 3-hour slots for that spot for the next 7 days
 ---
 ## Supported Library Maps
 - [Mappa Biblioteca Meneghetti](assets/mappa_meneghetti.pdf)
+- [Mappa Biblioteca Santa Marta](assets/mappa_santa_marta.pdf)
 ---
 
 ## Core Architecture
