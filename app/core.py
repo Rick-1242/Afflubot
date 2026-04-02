@@ -5,11 +5,11 @@ import os
 import re
 import time
 import email
-import random
 import imaplib
 import logging
 import requests
 from typing import Any
+from random import choice
 from dotenv import load_dotenv
 
 # Get the logger instance from the logging_config
@@ -18,9 +18,9 @@ logger = logging.getLogger('afflubot')
 # Get credentials securely from environment variables
 _ = load_dotenv()
 
-IMAP_SERVER = os.environ["IMAP_SERVER"]
-EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
-EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"]
+IMAP_SERVER = os.getenv("IMAP_SERVER")
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 
 def get_random_user_agent() -> str:
@@ -30,7 +30,7 @@ def get_random_user_agent() -> str:
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0",
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:148.0) Gecko/20100101 Firefox/148.0",
     ]
-    return random.choice(user_agent_list)
+    return choice(user_agent_list)
 
 
 def create_reservation(

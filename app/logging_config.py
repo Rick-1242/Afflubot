@@ -6,7 +6,7 @@ import sys
 from typing import Any
 
 # Ensure the logs directory exists
-log_dir = '../logs/'
+log_dir = './logs/'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
