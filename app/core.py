@@ -3,13 +3,13 @@
 
 import os
 import re
-import json
 import time
 import email
 import random
 import imaplib
 import logging
 import requests
+from typing import Any
 from dotenv import load_dotenv
 
 # Get the logger instance from the logging_config
@@ -17,12 +17,13 @@ logger = logging.getLogger('afflubot')
 
 # Get credentials securely from environment variables
 _ = load_dotenv()
-IMAP_SERVER = os.environ.get("IMAP_SERVER")
-EMAIL_ADDRESS = os.environ.get("EMAIL_ADDRESS")
-EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
+
+IMAP_SERVER = os.environ["IMAP_SERVER"]
+EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
+EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"]
 
 
-def get_random_user_agent():
+def get_random_user_agent() -> str:
     """Returns a random User-Agent string to mimic a real browser."""
     user_agent_list = [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
@@ -33,7 +34,7 @@ def get_random_user_agent():
 
 
 def create_reservation(
-    library_id: str, date: str, start_time: str, end_time: str, email_address: str, booking_context: dict
+    library_id: str, date: str, start_time: str, end_time: str, email_address: str, booking_context: dict[str, Any]
 ) -> bool:
     """
     Sends the initial reservation request to the Affluences API.
@@ -78,7 +79,7 @@ def create_reservation(
 
 
 def find_confirmation_link(
-    email_address: str, password: str, imap_server: str, booking_context: dict
+    email_address: str, password: str, imap_server: str, booking_context: dict[str, Any]
 ) -> str | None:
     """
     Logs into an email account, finds the latest Affluences confirmation email,
@@ -152,7 +153,7 @@ def find_confirmation_link(
             logger.info("IMAP connection closed.", extra={'context': email_context})
 
 
-def confirm_reservation(confirmation_url: str, booking_context: dict) -> bool:
+def confirm_reservation(confirmation_url: str, booking_context: dict[str, Any]) -> bool:
     """
     Visits the confirmation URL to finalize the booking.
     """
@@ -194,8 +195,8 @@ def confirm_reservation(confirmation_url: str, booking_context: dict) -> bool:
 
 
 def book_library_spot(
-    library_id: str, date: str, start_time: str, end_time: str, booking_context: dict
-):
+    library_id: str, date: str, start_time: str, end_time: str, booking_context: dict[str, Any]
+) -> None:
     """
     Main function to orchestrate the entire booking process for a library spot.
     """

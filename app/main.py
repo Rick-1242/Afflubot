@@ -2,9 +2,10 @@
 # This is the main entry point for the Afflubot application.
 # It parses command-line arguments and orchestrates the booking process.
 
-import argparse
 import sys
 import time
+import argparse
+from typing import Any
 from datetime import datetime, timedelta
 
 from . import core
@@ -13,10 +14,11 @@ from .logging_config import setup_logging
 
 logger = setup_logging()
 
-def main():
+def main() -> None:
     """
     The main function to parse arguments and run the booking loops.
     """
+    # ----------- Parse arguments -----------
     parser = argparse.ArgumentParser(
         description="Automated booking bot for Affluences library spots."
     )
@@ -47,8 +49,8 @@ def main():
 
     args = parser.parse_args()
 
-    # Create a context dictionary for logging
-    log_context = {
+    # ----------- Create a context dictionary for logging -----------
+    log_context: dict[str, Any] = {
         "library_name": args.library_name,
         "spot_number": args.spot_number,
         "start_date": args.start_date,
@@ -56,13 +58,13 @@ def main():
         "day_end_time": args.day_end_time,
         "dry_run": args.dry_run,
     }
-    logger.info("Application starting.", extra={'context': log_context})
+    logger.info("Afflubot starting.", extra={'context': log_context})
 
     if args.dry_run:
         logger.info("*** DRY RUN MODE ENABLED: No actual bookings will be made. ***")
 
     try:
-        # --- 1. Find the Library Data and Spot ID ---
+        # ----------- 1. Find the Library Data and Spot ID -----------
         library_data = LIBRARY_DATA.get(args.library_name)
         if not library_data:
             logger.error(
@@ -71,7 +73,7 @@ def main():
             )
             sys.exit(1)
 
-        # --- 1a. Validate Library Data Structure ---
+        # ----------- 1a. Validate Library Data Structure -----------
         required_keys = ["spots", "hours", "max_ahead_booking_days", "booking_chunk_hours"]
         for key in required_keys:
             if key not in library_data:
@@ -81,22 +83,6 @@ def main():
                 )
                 sys.exit(1)
 
-        if not isinstance(library_data["spots"], dict):
-            logger.error(f"'spots' for library '{args.library_name}' should be a dictionary.", extra={'context': log_context})
-            sys.exit(1)
-
-        if not isinstance(library_data["hours"], dict):
-            logger.error(f"'hours' for library '{args.library_name}' should be a dictionary.", extra={'context': log_context})
-            sys.exit(1)
-
-        if not isinstance(library_data["max_ahead_booking_days"], int):
-            logger.error(f"'max_ahead_booking_days' for '{args.library_name}' should be an integer.", extra={'context': log_context})
-            sys.exit(1)
-
-        if not isinstance(library_data["booking_chunk_hours"], int):
-            logger.error(f"'booking_chunk_hours' for '{args.library_name}' should be an integer.", extra={'context': log_context})
-            sys.exit(1)
-
         spot_id = library_data["spots"].get(args.spot_number)
         if not spot_id:
             logger.error(
@@ -105,19 +91,17 @@ def main():
             )
             sys.exit(1)
 
-        # Extract library-specific constants
         max_ahead_booking_days = library_data["max_ahead_booking_days"]
         booking_chunk_hours = library_data["booking_chunk_hours"]
 
         log_context['spot_id'] = spot_id
         logger.info(f"Successfully validated library and spot.", extra={'context': log_context})
 
-        # --- 2. Set up Date and Time Loops ---
+        # ----------- 2. Set up and Validate Date and Time Loops -----------
         booking_start_date = datetime.strptime(args.start_date, "%Y-%m-%d").date()
         day_start_dt = datetime.strptime(args.day_start_time, "%H:%M")
         day_end_dt = datetime.strptime(args.day_end_time, "%H:%M")
 
-        # --- 3. Run the Booking Loops ---
         today = datetime.now().date()
         max_allowed_date = today + timedelta(days=max_ahead_booking_days)
 
@@ -152,8 +136,8 @@ def main():
                 )
                 current_date += timedelta(days=1)
                 continue
-            # --- End Validation ---
 
+            # ----------- 3. Run the Booking Loops -----------
             current_time_dt = day_start_dt
             while current_time_dt < day_end_dt:
                 remaining_time = day_end_dt - current_time_dt
@@ -191,6 +175,7 @@ def main():
 
             current_date += timedelta(days=1)
 
+    # ----------- 3. Handle errors -----------
     except (ValueError, KeyError) as e:
         logger.error(f"Configuration or input error: {e}", extra={'context': log_context})
         sys.exit(1)
@@ -198,7 +183,7 @@ def main():
         logger.exception("An unhandled exception occurred during main execution.", extra={'context': log_context})
         sys.exit(1)
     finally:
-        logger.info("Application finished.", extra={'context': log_context})
+        logger.info("Afflubot finished.", extra={'context': log_context})
 
 
 if __name__ == "__main__":

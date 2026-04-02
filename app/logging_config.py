@@ -1,13 +1,12 @@
-
 import logging
 import logging.handlers
 import json
 import os
 import sys
-from datetime import datetime
+from typing import Any
 
 # Ensure the logs directory exists
-log_dir = '/Users/rick-1242/GIT/Afflubot/logs/'
+log_dir = '../logs/'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
@@ -15,9 +14,9 @@ class JsonFormatter(logging.Formatter):
     """
     Custom formatter to output log records as JSON.
     """
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         # Create a log record dictionary
-        log_record = {
+        log_record: dict[str, Any] = {
             "timestamp": self.formatTime(record, self.datefmt),
             "level": record.levelname,
             "name": record.name,
@@ -26,7 +25,7 @@ class JsonFormatter(logging.Formatter):
 
         # Add extra context if it exists
         if hasattr(record, 'context'):
-            log_record['context'] = record.context
+            log_record['context'] = getattr(record, 'context')
 
         # Add exception info if it exists
         if record.exc_info:
@@ -38,7 +37,7 @@ class JsonFormatter(logging.Formatter):
 
         return json.dumps(log_record)
 
-def setup_logging():
+def setup_logging() -> logging.Logger:
     """
     Sets up the 'afflubot' logger with a JSON file handler and a
     simple stream handler for console output.
