@@ -1,0 +1,57 @@
+name: Build and Push Docker Image
+
+# - On every push to 'main' → builds AND pushes to Docker Hub
+# - On every pull request   → builds only (no push), to catch errors early
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Generate image tags and OCI annotations from Git metadata
+      - name: Extract Docker image metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/afflubot
+          tags: |
+            # Tag 'latest' on every push to main
+            type=raw,value=latest,enable={{is_default_branch}}
+            # Also tag with the short commit SHA for traceability
+            type=sha,prefix=,format=short
+
+      # 3. Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 4. Set up Docker Buildx (needed for provenance/SBOM and caching)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      # 5. Build the image and push it to Docker Hub
+      #    'push' is false on PRs so we only validate the build, not publish
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          # Cache layers between runs to speed up builds
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # Attach provenance and SBOM attestations for supply-chain security
+          provenance: true
+          sbom: true

@@ -28,7 +28,7 @@ def run_bot() -> None:
         logger.error("Missing required environment variables. Ensure LIBRARY, SPOT, TIME_START, TIME_END, IMAP_SERVER, EMAIL_ADDRESS, and EMAIL_PASSWORD are set.")
         return
 
-    library_data = LIBRARY_DATA.get(library) # ignore mypy/pyright its crazy
+    library_data = LIBRARY_DATA.get(library) # ignore mypy/pyright is crazy stupid
     if not library_data:
         logger.error(f"Library '{library}' not found in locations.py.")
         return
@@ -40,7 +40,7 @@ def run_bot() -> None:
 
     logger.info(f"Scheduler running booking job for {library} spot {spot} on {target_date} from {time_start} to {time_end}")
 
-    cmd = [sys.executable, "-m", "afflubot.cli", library, spot, target_date, time_start, time_end]
+    cmd = [sys.executable, "-m", "afflubot.cli", str(library), str(spot), target_date, str(time_start), str(time_end)]
 
     try:
         logger.info(f"Executing: {' '.join(cmd)}")
