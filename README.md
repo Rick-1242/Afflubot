@@ -86,16 +86,10 @@ python -m afflubot Meneghetti 141 2026-04-08 09:00 18:00
 
 For a fully hands-off experience. The built-in scheduler reads your `.env` configuration and triggers the booking script daily at the scheduled time.
 
-**1. Pull or Build the Image:**
-```bash
-docker pull rick1242/afflubot
-# OR build it locally: docker build -t afflubot .
-```
-
-**2. Run the Container in the Background:**
+**1. Pull the image and Run the Container in the Background:**
 Using the `.env` (Recommended) file you created in Step 1:
 ```bash
-docker run -d --name my-afflubot --env-file .env afflubot
+docker run -d --name my-afflubot --env-file .env rick1242/afflubot
 ```
 *Alternatively*, if you prefer not to use a `.env` file, you can pass the variables directly inline:
 ```bash
