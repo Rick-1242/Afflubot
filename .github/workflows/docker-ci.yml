@@ -55,3 +55,13 @@ jobs:
           # Attach provenance and SBOM attestations for supply-chain security
           provenance: true
           sbom: true
+      # 6. Sync README.md to Docker Hub repository description
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        # Only runs on push to main, not on PRs
+        if: github.event_name != 'pull_request'
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: ${{ secrets.DOCKER_USERNAME }}/afflubot
+          readme-filepath: ./README.md
