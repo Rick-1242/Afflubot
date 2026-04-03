@@ -214,7 +214,7 @@ def book_library_spot(
     logger.info("Waiting for confirmation email to arrive...", extra={'context': booking_context})
     confirmation_link = None
     for i in range(5):  # Retry 5 times over ~50 seconds
-        time.sleep(5)
+        time.sleep(10)
         logger.info(f"Checking for email (Attempt {i + 1}/5)...", extra={'context': booking_context})
 
         confirmation_link = find_confirmation_link(

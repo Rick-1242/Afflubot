@@ -6,10 +6,10 @@ import subprocess
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
-# Ensure the app module can be found from the parent directory
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from app.locations import LIBRARY_DATA
-from app.logging_config import setup_logging
+# Ensure the afflubot package can be found
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+from afflubot.locations import LIBRARY_DATA  # pyright: ignore[reportImplicitRelativeImport]
+from afflubot.logging_config import setup_logging  # pyright: ignore[reportImplicitRelativeImport]
 
 logger = setup_logging()
 
@@ -42,8 +42,8 @@ def run_bot() -> None:
 
     cmd = [
         sys.executable,
-        "-m", "app.main",
-        str(library),
+        "-m", "afflubot.cli",
+        library,
         str(spot),
         target_date,
         str(time_start),
