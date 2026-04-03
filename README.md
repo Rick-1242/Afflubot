@@ -16,25 +16,52 @@ Afflubot is a robust Python CLI application designed to automate the tedious pro
 The bot books a spot for the entire day by breaking the daily time window into smaller, bookable chunks (typically 2-hour or 3-hour slots depending on the library). 
 
 ### Supported Libraries (UniVR)
-- [Biblioteca Frinzi](https://affluences.com/it/sites/universita-di-verona) - Università di Verona in Via San Francesco 20
-  - [Mappa Biblioteca Finzi](assets/mappa_frinzi.pdf)
+<!--- [Biblioteca Frinzi](https://affluences.com/it/sites/universita-di-verona) - Università di Verona in Via San Francesco 20
+  - [Mappa Biblioteca Finzi](assets/mappa_frinzi.pdf)-->
 - [Biblioteca Santa Marta](https://affluences.com/it/sites/biblioteca-santa-marta) - Università di Verona in Via Cantarane 24
   - [Mappa Biblioteca Santa Marta](assets/mappa_santa_marta.pdf)
 - [Biblioteca Meneghetti](https://affluences.com/it/sites/biblioteca-meneghetti-1) - Università di Verona in Strada le Grazie 8
   - [Mappa Biblioteca Meneghetti](assets/mappa_meneghetti.pdf)
 
-## 🚀 Usage instructions
+---
+
+## ⚙️ Getting Started
+
+Before running the bot in any mode, you need to configure your credentials.
+
+**Step 1: Create a `.env` file**
+```bash
+cp .env.example .env
+```
+
+**Step 2: Configure your `.env` file**  
+Open the newly created `.env` file and fill in your details:
+* **For Manual (CLI) use:** Only the "Core Configuration" section is required.
+* **For Docker use:** Fill out BOTH the "Core Configuration" and "Automated Scheduler Configuration" sections.
+
+---
+
+## 🚀 Execution Modes
 
 There are two primary ways to run Afflubot: manually via the Python CLI or continuously via Docker.
 
 ### 1. Manual Execution (CLI)
 
-You can run the application directly using Python. This is ideal for manual bookings or setting up your own `cron` jobs on a Linux machine to run automatically at midnight.
+Ideal for manual bookings or setting up your own `cron` jobs on a Linux machine. *(Requires Python 3.10+)*
 
-**⚠️ Important:** You *must* run the application from within the `src` directory so that relative imports and environment variables resolve correctly.
+**1. Install dependencies:**
+```bash
+pip install -r requirements.txt
+```
 
+**2. Navigate to the source directory:**
+> **⚠️ Important:** You *must* run the application from within the `src` directory so relative paths resolve correctly!
 ```bash
 cd src
+```
+
+**3. Run the bot:**
+```bash
 python -m afflubot <library_name> <spot_number> <start_date> <day_start_time> <day_end_time>
 ```
 
@@ -50,29 +77,35 @@ To book spot #141 at Biblioteca Meneghetti from 09:00 to 18:00, starting on Apri
 ```bash
 python -m afflubot Meneghetti 141 2026-04-08 09:00 18:00
 ```
-*Tip: On linux, you can easily automate this by adding the command to your `crontab`.*
 
-### 2. Automated Execution (Docker & Scheduler)
+### 2. Automated Execution 🐳
 
-For a fully hands-off experience, you can use the built-in scheduler via Docker. The `scheduler.py` script acts as an entry point, reading your configuration from `.env` environment variables and automatically triggering the main booking script every day at 04:00 for the maximum allowed booking date ahead.
+For a fully hands-off experience. The built-in scheduler reads your `.env` configuration and triggers the booking script daily at the scheduled time.
 
+**1. Pull or Build the Image:**
 ```bash
-docker pull afflubot .
-docker run -d --env-file .env afflubot
+docker pull afflubot
+# OR build it locally: docker build -t afflubot .
 ```
 
-## ⬇️ Installation instructions
-
-To run the project locally without Docker, you will need Python 3.10 or newer.
-
-1. Clone the repository and navigate into it.
-2. Install the required dependencies:
-
+**2. Run the Container in the Background:**
 ```bash
-pip install -r requirements.txt
+docker run -d --name my-afflubot --env-file .env afflubot
 ```
 
-3. Create a `.env` file in the root directory. You must include your sensitive credentials (email, IMAP settings, and Affluences password) here. It is also used to configure the daily scheduler variables if using Docker.
+**3. (Recommended) Run with Log Persistence:**  
+If you want the bot's log files to be saved directly to your host machine so you can read them easily:
+```bash
+docker run -d --name my-afflubot --env-file .env -v $(pwd)/src/logs:/app/src/logs afflubot
+```
+
+Helpful Docker Commands
+
+* **View live stdout and stderr:** `docker logs -f my-afflubot`
+* **Stop the bot:** `docker stop my-afflubot`
+* **Delete the container:** `docker rm my-afflubot`
+
+---
 
 ## 🏗️ Core Architecture
 

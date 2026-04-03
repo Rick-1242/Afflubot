@@ -1,16 +1,3 @@
 requests
 python-dotenv
 schedule
-typing
-sys
-time
-datetime
-subprocess
-os
-dotenv
-imaplib
-email
-random
-logging
-re
-json

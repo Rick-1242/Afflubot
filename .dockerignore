@@ -1,0 +1,11 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+.env
+.env.example
+.DS_Store
+README.md
+README BEST PRACISES.md
+GEMINI.md

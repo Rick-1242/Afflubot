@@ -40,15 +40,7 @@ def run_bot() -> None:
 
     logger.info(f"Scheduler running booking job for {library} spot {spot} on {target_date} from {time_start} to {time_end}")
 
-    cmd = [
-        sys.executable,
-        "-m", "afflubot.cli",
-        library,
-        str(spot),
-        target_date,
-        str(time_start),
-        str(time_end)
-    ]
+    cmd = [sys.executable, "-m", "afflubot.cli", library, spot, target_date, time_start, time_end]
 
     try:
         logger.info(f"Executing: {' '.join(cmd)}")
