@@ -18,12 +18,14 @@ Afflubot is a robust Python CLI application designed to automate the tedious pro
 The bot books a spot for the entire day by breaking the daily time window into smaller, bookable chunks (typically 2-hour or 3-hour slots depending on the library). 
 
 ### Supported Libraries (UniVR)
-<!--- [Biblioteca Frinzi](https://affluences.com/it/sites/universita-di-verona) - Università di Verona in Via San Francesco 20
-  - [Mappa Biblioteca Finzi](assets/mappa_frinzi.pdf)-->
 - [Biblioteca Santa Marta](https://affluences.com/it/sites/biblioteca-santa-marta) - Università di Verona in Via Cantarane 24
-  - [Mappa Biblioteca Santa Marta](assets/mappa_santa_marta.pdf)
+  - [Mappa Biblioteca Santa Marta](assets/mappa_santa_marta.pdf) ONLY SALA STUDIO SCIENZE GIUDRIDICHE
 - [Biblioteca Meneghetti](https://affluences.com/it/sites/biblioteca-meneghetti-1) - Università di Verona in Strada le Grazie 8
   - [Mappa Biblioteca Meneghetti](assets/mappa_meneghetti.pdf)
+
+### Not yet supported Libraries
+- [Biblioteca Frinzi](https://affluences.com/it/sites/universita-di-verona) - Università di Verona in Via San Francesco 20
+  - [Mappa Biblioteca Finzi](assets/mappa_frinzi.pdf)
 
 ---
 
