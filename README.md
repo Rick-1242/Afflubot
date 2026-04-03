@@ -1,4 +1,12 @@
 # 📚 Afflubot
+[![Build and Push](https://github.com/Rick-1242/Afflubot/actions/workflows/docker-ci.yml/badge.svg)](https://github.com/Rick-1242/Afflubot/actions/workflows/docker-ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python&logoColor=white)](https://python.org)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://docker.com)
+[![License](https://img.shields.io/github/license/Rick-1242/Afflubot)](./LICENSE)
+<!-- Docker Hub -->
+[![Docker Pulls](https://img.shields.io/docker/pulls/rick1242/afflubot)](https://hub.docker.com/r/rick1242/afflubot)
+[![Docker Image Size](https://img.shields.io/docker/image-size/rick1242/afflubot/latest)](https://hub.docker.com/r/rick1242/afflubot)
+
 
 > *Automated library spot booking for the Affluences platform.*
 
