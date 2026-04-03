@@ -84,13 +84,26 @@ For a fully hands-off experience. The built-in scheduler reads your `.env` confi
 
 **1. Pull or Build the Image:**
 ```bash
-docker pull afflubot
+docker pull rick1242/afflubot
 # OR build it locally: docker build -t afflubot .
 ```
 
 **2. Run the Container in the Background:**
+Using the `.env` (Recommended) file you created in Step 1:
 ```bash
 docker run -d --name my-afflubot --env-file .env afflubot
+```
+*Alternatively*, if you prefer not to use a `.env` file, you can pass the variables directly inline:
+```bash
+docker run -d --name my-afflubot \
+  -e IMAP_SERVER=imap.gmail.com \
+  -e EMAIL_ADDRESS=your.email@gmail.com \
+  -e EMAIL_PASSWORD=your-16-char-app-password \
+  -e LIBRARY=Meneghetti \
+  -e SPOT=141 \
+  -e TIME_START=09:00 \
+  -e TIME_END=18:00 \
+  afflubot
 ```
 
 **3. (Recommended) Run with Log Persistence:**  
