@@ -1,5 +1,5 @@
 # Use a lightweight official Python image
-FROM python:3.12.2-slim
+FROM python:3.11-slim
 
 # Set environment variables to optimize Python execution
 ENV PYTHONDONTWRITEBYTECODE=1 \
