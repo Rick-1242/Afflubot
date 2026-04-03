@@ -57,9 +57,6 @@ def run_bot() -> None:
 
 if __name__ == "__main__":
     check = load_dotenv()
-    if not check:
-        logger.error("Failed to load .env file. Exiting.")
-        sys.exit(1)
 
     logger.info("---------------- Scheduler started ----------------")
 

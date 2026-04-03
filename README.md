@@ -107,14 +107,16 @@ docker run -d --name my-afflubot \
 **3. (Recommended) Run with Log Persistence:**  
 If you want the bot's log files to be saved directly to your host machine so you can read them easily:
 ```bash
-docker run -d --name my-afflubot --env-file .env -v $(pwd)/src/logs:/app/src/logs afflubot
+docker run -d --name my-afflubot --env-file .env -v $(pwd)/src/logs:/app/src/logs rick1242/afflubot
 ```
 
 Helpful Docker Commands
 
 * **View live stdout and stderr:** `docker logs -f my-afflubot`
+* **View logs:** `docker exec my-afflubot cat logs/events.log`
 * **Stop the bot:** `docker stop my-afflubot`
 * **Delete the container:** `docker rm my-afflubot`
+* **Build your own immage:** `docker build -t afflubot .`
 
 ---
 
