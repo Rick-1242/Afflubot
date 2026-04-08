@@ -15,7 +15,7 @@
 
 Afflubot is a robust Python CLI application designed to automate the tedious process of booking library spots through the Affluences platform. It is built to run autonomously, ensuring you never miss a spot at your favorite university library. 
 
-The bot books a spot for the entire day by breaking the daily time window into smaller, bookable chunks (typically 2-hour or 3-hour slots depending on the library). 
+The bot books a spot for the entire day by breaking the daily time window into smaller, bookable chunks (now using 1-hour slots to reduce the chance of getting outbooked). 
 
 ### Supported Libraries (UniVR)
 - [Biblioteca Santa Marta](https://affluences.com/it/sites/biblioteca-santa-marta) - Università di Verona in Via Cantarane 24

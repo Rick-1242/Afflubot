@@ -91,13 +91,13 @@ LIBRARY_DATA: dict[str, LibraryInfo] = {
         "spots": MENEGHETTI_SPOTS,
         "hours": MENEGHETTI_HOURS,
         "max_ahead_booking_days": 7,
-        "booking_chunk_hours": 3,
+        "booking_chunk_hours": 1,
     },
     "Santa_Marta": {
         "spots": SANTA_MARTA_SPOTS,
         "hours": SANTA_MARTA_HOURS,
         "max_ahead_booking_days": 7,
-        "booking_chunk_hours": 3,
+        "booking_chunk_hours": 1,
     },
     # e.g., "Frinzi": { "spots": FRINZI_SPOTS, "hours": FRINZI_HOURS }
 }
